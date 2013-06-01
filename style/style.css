@@ -1,0 +1,252 @@
+/* Any demo specific styling needed for this tutorial only */
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
+#appLayout {
+    height: 100%;
+}
+
+#contentStack {
+	margin: 0;
+	padding: 0;
+}
+
+#leftCol {
+    width: 20%;
+}
+
+#div_id_tab_container {
+	height: 40%;
+}
+
+.claro .demoLayout .edgePanel {
+	background-color: #3D3D3D;
+	background-image: url('../image/dark_background_stripes.gif');
+	color: white;
+}
+
+#viewsChart {
+	width: 550px;
+	height: 550px;
+}
+
+/* Brukast i resultat tab. Fjernar scrollbar. */
+.remove_overflow {
+	/* padding: 0px !important; */
+	overflow: hidden !important;
+}
+
+.subtab_1_container {
+	width:100%;
+	height:100%;
+	
+	display: -moz-box;
+	display: -webkit-box;
+	display: box;
+	
+	-moz-box-orient: horizontal;
+	-webkit-box-orient: horizontal;
+	box-orient: horizontal;
+}
+
+.subtab_1_left_div {
+	background-color:#d0e9fc;
+	width:200px;
+	margin-right: 10px;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #b5bcc7;
+	padding: 5px;
+	
+	-moz-box-flex: 0;
+	-webkit-box-flex: 0;
+	box-flex: 0;
+	
+	-moz-box-align: start;
+	-webkit-box-align: start;
+	box-align: start;
+}
+
+.subtab_1_right_div {
+	height:auto;
+	/* margin-top: 10px; */
+	border-style: solid;
+	border-width: 1px;
+	border-color: #b5bcc7;
+	
+	-moz-box-flex: 1;
+	-webkit-box-flex: 1;
+	box-flex: 1;
+}
+
+#div_id_tab_search_settings {
+	padding: 0px;
+	height: auto;
+}
+
+.tab-container {
+	height: auto;
+}
+
+.search-header {
+	background-color: #3D3D3D;
+	background-image: url('../image/dark_background_stripes.gif');
+	height: 40px;
+	font-family: "Droid Sans",Arial,sans-serif;
+	color: white;
+}
+
+.search-header-banner {
+	background-color: #88B131;
+	height: 5px;
+}
+
+.search-header-content {
+	margin-left: 5px;
+	margin-top: 0px;
+	-moz-box-orient: horizontal;
+	-ms-box-orient: horizontal;
+	-webkit-box-orient: horizontal;
+	-o-box-orient: horizontal;
+	box-orient: horizontal;
+	display: -moz-box;
+	display: -ms-box;
+	display: -webkit-box;
+	display: -o-box;
+	display: box;
+}
+
+.wherewhowhat {
+	margin-top: 5px;
+}
+.wherewhowhatb {
+	margin-top: 1px;
+}
+
+.search-header-content span {
+	color: dimgrey;
+}
+
+.search-content {
+	font-family: "Droid Sans",Arial,sans-serif;
+	-moz-box-orient: horizontal;
+	-ms-box-orient: horizontal;
+	-webkit-box-orient: horizontal;
+	-o-box-orient: horizontal;
+	box-orient: horizontal;
+	display: -moz-box;
+	display: -ms-box;
+	display: -webkit-box;
+	display: -o-box;
+	display: box;
+	height: auto;
+}
+
+.search-content h2 {
+	font-size: 1em;
+	margin-bottom: 0px;
+	font-weight: bold;
+	text-transform: uppercase;
+	color: #3D3D3D;
+}
+
+.search-content h2 + p {
+	font-size: 10px;
+	margin-top: 0px;
+	color: #8E8E8E;
+}
+
+.map-status-box {
+	margin-left: 5px;
+	margin-top: 5px;
+	width: 120px;
+	height: 185px;
+	border-right: 1px solid #CECECE;
+}
+
+.search-source-box {
+	height: 100px;
+	margin-left: 5px;
+	margin-top: 5px;
+	width: 160px;
+	height: 185px;
+	border-right: 1px solid #CECECE;
+}
+
+.what-box {
+	width: 450 px;
+	margin-left: 5px;
+	margin-top: 5px;
+	border-right: 1px solid #CECECE;
+	padding-right: 5px;
+}
+
+.osm-filter-search-box {
+	width: 450 px;
+	margin-left: 5px;
+	margin-top: 5px;
+	height: auto;
+}
+
+.div_class_selected_thing_container h2,
+.div_class_selected_thing_container h3 {
+	margin-bottom: 2px;
+}
+
+.div_class_selected_thing_container h2 + p,
+.div_class_selected_thing_container h3 + p {
+	margin-top: 3px;
+	font-size: 11px;
+	color: #CCC;
+	padding-bottom: 9px;
+}
+
+.div_class_selected_thing_container a:link,
+.div_class_selected_thing_container a:visited {
+	color: white;
+}
+
+.div_class_search_status h2 {
+	border-bottom: 1px solid #88B131;
+}
+
+.div_class_osm_category h2 {
+	border-bottom: 1px solid #88B131;
+}
+
+.div_class_thing_property h3 {
+	border-bottom: 1px solid #39F;
+	font-size: 14px;
+	padding-bottom: 2px;
+}
+
+.div_class_thing_reasoning h3 {
+	border-bottom: 1px solid #FF9933;
+	font-size: 14px;
+	padding-bottom: 2px;
+}
+
+.div_class_heatmap_categorysation p label {
+	font-size: 19px;
+}
+
+.div_class_heatmap_categorysation {
+	border-bottom: 1px solid #736F6E;
+}
+
+#div_id_tab_heatmap_settings div:nth-of-type(odd) {
+	background-color:#B2D8FC;
+}
+
+#div_id_at_least_one_or_all_property_match {
+	margin-top: 7px;
+}
+
+#div_id_selected_thing h4 {
+	margin-top: 3px;
+}
+

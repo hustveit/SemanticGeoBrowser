@@ -1,0 +1,586 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>SemanticGeoBrowser</title>
+		<link rel="stylesheet" href="style/demo.css" media="screen">
+		<link rel="stylesheet" href="style/style.css" media="screen">
+		
+		<!-- http://ajax.googleapis.com/ajax/libs/dojo/1.6/dijit/themes/claro/claro.css -->
+		<link rel="stylesheet" href="dojo-release-1.6.1/dijit/themes/claro/claro.css" media="screen">
+		
+		<!-- http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojox/grid/resources/claroGrid.css -->
+		<link rel="stylesheet" href="dojo-release-1.6.1/dojox/grid/resources/claroGrid.css" media="screen">
+		
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=geometry,visualization"></script>
+		<script type="text/javascript" charset="UTF-8" src="js/semantic_geo_browser_note.js"></script>
+		<script type="text/javascript" charset="UTF-8" src="js/semantic_geo_browser_note2.js"></script>
+		<script type="text/javascript" charset="UTF-8" src="js/semantic_geo_browser_google_map.js"></script>
+		<script type="text/javascript" charset="UTF-8" src="js/semantic_geo_browser_dojo_store.js"></script>
+		<script type="text/javascript" charset="UTF-8" src="js/semantic_geo_browser_search_sindice.js"></script>
+		<script type="text/javascript" charset="UTF-8" src="js/semantic_geo_browser_open_street_map.js"></script>
+		
+		<!-- load dojo and provide config via data attribute -->
+		<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.0/dojo/dojo.xd.js" data-dojo-config="parseOnLoad: true"></script>
+		<script>
+			dojo.require("dojo.parser");
+			dojo.require("dijit.layout.BorderContainer");
+			dojo.require("dijit.layout.StackContainer");
+			dojo.require("dijit.layout.StackController");
+			dojo.require("dijit.layout.ContentPane");
+			dojo.require("dijit.layout.TabContainer");
+			dojo.require("dijit.form.Button");
+			dojo.require("dojo.store.Memory");
+			dojo.require("dojox.grid.DataGrid");
+			dojo.require("dojo.data.ObjectStore");
+			dojo.require("dojo.io.script");
+			dojo.require("dojo.DeferredList");
+			
+			dojo.ready(function(){
+				
+				initialize_google_map();
+				boot_up_dojo_memory_store();
+				boot_up_search_overview_store();
+				boot_up_heatmap_store();
+				generate_what_box("sindice");
+
+	//
+	// Search Sindice
+	// Search OpenStreetMap.org
+	//
+	new dijit.form.Button({
+		onClick: function(){
+	
+	// Skal vi søke i "sindice" eller "osm"?
+	var form_input = get_input_from_form_radio("form_select_data_source");
+
+	//
+	// The search steps - START
+	//
+	if ( form_input == "sindice" ) {
+					
+	// #4.
+	console.debug("#4. START");
+	dojo.when(
+		what_2_search_4_in_sindice(),
+		function(returned_array_4) {
+				
+			var this_is_the_thing_we_are_looking_for = returned_array_4[0]; // the name/lable, for example: Hike
+			var the_rdf_triples_we_are_looking_for = returned_array_4[1];
+			var use_this_google_map_icon = returned_array_4[2];
+			var this_is_the_type_uri_of_the_thing_we_are_looking_for = returned_array_4[3]; // for example: http://data.sognefjord.vestforsk.no/resource/ontology#Hike
+
+			var number_of_rdf_triples_we_are_looking_for = 0;
+			if (the_rdf_triples_we_are_looking_for != null) {
+				number_of_rdf_triples_we_are_looking_for = the_rdf_triples_we_are_looking_for.RDFtriple.length;
+			}
+						
+			console.debug("this_is_the_thing_we_are_looking_for: " + this_is_the_thing_we_are_looking_for);
+			console.debug("the_rdf_triples_we_are_looking_for: ");
+			console.debug(the_rdf_triples_we_are_looking_for);
+			
+			console.debug("	#4. END");
+			
+		
+	// #1.
+	console.debug("#1. START");
+	dojo.when(
+		open_new_dojo_tab_showing_the_search_result(
+			this_is_the_thing_we_are_looking_for
+		),
+		function(returned_array_1) {
+			
+			var new_tab_div_id = returned_array_1[0];
+			var new_store_array_number = returned_array_1[1];
+							
+			// "returned_array_1[0]" innehar namn på div id ein skal sette innhald inn i.
+			console.debug("#1. Creating new tab: " + new_tab_div_id);
+							
+			// "returned_array_1[1]" innehar div id nummeret.
+			console.debug("This is tab number: " + new_store_array_number);
+			
+			
+			search_overview_store.add({
+				search_result_id:		new_store_array_number,					// for example: 1
+				search_label:			this_is_the_thing_we_are_looking_for,	// for example: Hike
+				type:					'searchResultGroup',
+				search_criteria:		the_rdf_triples_we_are_looking_for,
+				location_icon:			use_this_google_map_icon,
+				type_uri:				this_is_the_type_uri_of_the_thing_we_are_looking_for,
+				area_of_interest: 		create_area_of_interest_border(new_store_array_number),
+				search_source: 			'sindice'
+			});
+			
+			console.debug("	#1. END");
+			
+
+	// #2.
+	console.debug("#2. START");
+	dojo.when(
+		prepare_store_for_new_search_result_input(
+			new_store_array_number,
+			number_of_rdf_triples_we_are_looking_for
+		),
+		function(returned_by_2) {
+		
+			var div_id_tab_search_result = returned_by_2;	//id of the tab div
+			
+			console.debug("	#2. END");
+			
+			
+	// #3.
+	console.debug("#3. START - http_request:");
+	dojo.when(
+		generate_the_http_request(
+			new_store_array_number,
+			the_rdf_triples_we_are_looking_for,
+			this_is_the_type_uri_of_the_thing_we_are_looking_for, 	// used here for text search / everything
+			this_is_the_thing_we_are_looking_for 					// used here for text search / everything
+		),
+		function(returned_array_3) {
+		
+			var http_request			= returned_array_3[0];
+			var number_of_triples		= returned_array_3[1];
+						
+			console.debug(http_request);
+			console.debug("#3. END");
+			
+			
+			
+	// #5. Får svar frå Sindice.com, lagrar resultatet i dojo store.
+	console.debug("#5. START (Query Sindice.com)");
+	dojo.when(
+		search_the_sindice_index(	new_store_array_number,
+									http_request),
+		function(returned_by_5) {
+	
+			console.debug("#5. END");
+			
+			
+	// #6.
+	// Hentar meir data om kvar ting: Sindice Cache API V3 - http://www.sindice.com/developers/cacheapi
+	console.debug("#6. START");
+	dojo.when(
+		for_each_item_in_sindice_index_reply(new_store_array_number),
+		function(reply_6) {
+			console.debug("#6. END");
+	
+	//
+	// Frå denne plassen er alle data på Sindice.com henta og lagra i dojo store.
+	// No handlar det om å analysere rdf'tripplane og lagre resultatet i parent item.
+	//
+			
+	// #10.
+	console.debug("#10. START");
+	dojo.when(
+		identify_location_triples(
+			new_store_array_number,
+			use_this_google_map_icon
+		),
+		function(reply_10) {
+			console.debug("#10. END");
+
+			
+	// #11.
+	// Søk gjennom rdf'tripplane etter eigenskapane som denne appen støttar.
+	console.debug("#11. START");
+	dojo.when(
+		identify_supported_properties(
+			new_store_array_number
+		),
+		function(reply_11) {
+			console.debug("#11. END");
+	
+	// #12.
+	//TODO ----------------------------------------------- Reasoning! På alle ting som er indentifisert som ein hike!
+	// Bruk fargekode på user interface for å vise at tingen er støtta av app'en.
+	//
+	console.debug("#12. START");
+	dojo.when(
+		execute_reasoning_on_supported_properties(
+			new_store_array_number
+		),
+		function(reply_12) {
+			console.debug("#12. END");
+			
+			
+	// #7.
+	console.debug("#7. START");
+	dojo.when(
+		count_matching_rdf_triples_in_the_search_result(
+			new_store_array_number,
+			number_of_rdf_triples_we_are_looking_for
+		),
+		function(reply_7) {
+			console.debug("#7. END");
+
+	// #8.
+	// Vis søkeresultat i grid (tabell).
+	console.debug("#8. START");
+	dojo.when(
+		query_the_results_in_dojo_store(
+			new_store_array_number,
+			number_of_triples
+		),
+		function(reply_8) {
+			console.debug("#8. END");
+					
+			console.debug(store);
+
+					
+		}
+	); //END dojo.when() #8.
+		}
+	); //END dojo.when() #7.
+		}
+	); //END dojo.when() #12.
+		}
+	); //END dojo.when() #11.
+		}
+	); //END dojo.when() #10.
+		}
+	); //END dojo.when() #6.
+		}
+	); //END dojo.when() #5.
+		}
+	); //END dojo.when() #3.
+		}
+	); //END dojo.when() #2.
+		}
+	); //END dojo.when() #1.
+		}
+	); //END dojo.when() #4.
+
+	} //END if ( form_input == "sindice" )
+	else if ( form_input == "osm" ) {
+
+		var osm_form_input_check = false;
+		var osm_form_input_selected_things = [];
+		var osm_form_input_nearby_thing = osm_set_nearby_thing(); // undefined or object
+		var osm_form_input = get_input_from_form_radio("form_osm_everything_or_selected");
+		// search_everything or search_selected_things
+		var sparql_filter = createSparqlFilter("geo", osm_form_input_nearby_thing);
+
+		if ( osm_form_input == "search_everything" ) {
+			osm_form_input_check = true;
+		}
+		else if ( osm_form_input == "search_selected_things" ) {
+			osm_form_input_selected_things = get_input_from_form_checkbox("form_search_settings");
+
+			// Lyt ha minimum ein ting å søke etter.
+			if ( osm_form_input_selected_things.length > 0 ) {
+				osm_form_input_check = true;
+			}
+			else {
+				alert("Please select something to search for. Thanks!");
+			}
+		} //END else if
+
+		if ( osm_form_input_check == true ) {
+
+/*
+		console.debug("#1. START");
+		dojo.when(
+			what_2_search_4_in_osm(),
+			function(reply_1) {
+
+				var thing_type_uri 		= reply_1.thing_type_uri;
+				var thing_type_label 	= reply_1.thing_type_label;
+
+console.debug(reply_1);
+Object
+thing_type: "thing_to_search_for"
+thing_type_label: "Apotek"
+thing_type_uri: "http://linkedgeodata.org/ontology/Pharmacy"
+
+
+		console.debug("#1. END");
+*/
+		console.debug("#2. START");
+		dojo.when(
+			open_new_dojo_tab_showing_the_search_result_for_osm(),
+			function(reply_2) {
+
+				var new_tab_div_id = reply_2[0];
+				var search_result_id = reply_2[1];
+								
+				// "reply_2[0]" innehar namn på div id ein skal sette innhald inn i.
+				console.debug("#1. Creating new tab: " + new_tab_div_id);
+								
+				// "reply_2[1]" innehar div id nummeret.
+				console.debug("This is tab number: " + search_result_id);
+				
+				search_overview_store.add({
+					search_result_id:		search_result_id,					// for example: 1
+					search_label:			"Search " + search_result_id,		// for example: Search 1
+					search_source: 			'osm',
+					search_type: 			osm_form_input,
+					type:					'searchResultGroup',
+					type_uri:				osm_form_input_selected_things, 	// array with uri
+					area_of_interest: 		create_area_of_interest_border(search_result_id)
+				});
+				
+		console.debug("#2. END");
+		console.debug("#3. START");
+		dojo.when(
+			count_things_in_osm_endpoint(
+				osm_form_input_selected_things,
+				search_result_id,
+				osm_form_input_nearby_thing,
+				sparql_filter
+			),
+			function(reply_3) {
+
+				// reply_3 inneheld tal på ting funne.
+
+				if ( reply_3 > 0 ) {
+					console.debug(search_overview_store);
+					// dersom ein fant noko.
+					alert("Found "+ reply_3 +" things. Please wait.")
+
+		console.debug("#3. END");
+		console.debug("#4. START");
+		dojo.when(
+			query_open_street_map_sparql_endpoint(
+				osm_form_input_selected_things,
+				reply_3,			// tal på ting funne
+				search_result_id,
+				osm_form_input_nearby_thing,
+				sparql_filter
+			),
+			function(reply_4) {
+				console.debug(reply_4); // tal på unike ting funne og lagra.
+		console.debug("#4. END");
+		console.debug("#5. START");
+		dojo.when(
+			get_more_from_osm(
+				search_result_id
+			),
+			function(reply_5) {
+				console.debug(reply_5); // tal på unike ting oppdatert med rdf tripplar.
+		console.debug("#5. END");
+		console.debug("#6. START");
+		dojo.when(
+			osm_identify_supported_properties(
+				search_result_id
+			),
+			function(reply_6) {
+
+
+
+		console.debug("#6. END");
+		console.debug("#7. START");
+		dojo.when(
+			osm_identify_location_triples(
+				search_result_id
+			),
+			function(reply_7) {
+				console.debug(reply_7);
+
+				console.debug(open_street_map_result_stores[search_result_id]); //temp
+				console.debug(osm_rdf_store[search_result_id]); //temp
+				console.debug(osm_category_store[search_result_id]); //temp
+				
+
+
+
+
+
+		console.debug("#7. END");
+		console.debug("#8. START");
+		dojo.when(
+			osm_add_result_to_new_tab(
+				search_result_id
+			),
+			function(reply_8) {
+		
+
+
+			}
+		); //END dojo.when()
+			}
+		); //END dojo.when()
+			}
+		); //END dojo.when()
+			}
+		); //END dojo.when()
+			}
+		); //END dojo.when()
+				}
+				else {
+					// dersom ein ikkje fant noko.
+					alert("Fant ingenting.");
+
+		console.debug("#3. END");
+				} //END else
+
+
+
+
+			}
+		); //END dojo.when()
+			}
+		); //END dojo.when()
+
+/*
+		var search_result_id = 1; // temp
+
+		console.debug("#1. START");
+		dojo.when(
+			query_open_street_map_sparql_endpoint(
+				search_result_id
+			),
+			function(query_open_street_map_sparql_endpoint_reply) {
+				console.debug(query_open_street_map_sparql_endpoint_reply);
+
+				var this_is_the_thing_we_are_looking_for = "Everything";
+
+
+		console.debug("#1. END");
+
+
+			}
+		); //END dojo.when()
+*/
+
+
+
+
+
+
+
+		} //END if ( osm_form_input_check == true )
+	} //END if ( form_input == "osm" )
+	//
+	// The search steps - END
+	//
+
+		},
+		label: "Search"
+	}, "form_search_button_id"); //END dijit.form.Button()
+
+
+	//
+	// Start - Event on the tabs
+	//
+	var tab_container_object = dijit.byId('div_id_tab_container');
+	tab_container_object.watch("selectedChildWidget", function(name, old_tab, new_tab) {
+	    console.log("selected child changed from ", old_tab, " to ", new_tab);
+	    change_area_of_interest(old_tab,new_tab);
+	    console.debug(search_overview_store);
+
+
+
+	});
+	//
+	// End - Event on the tabs
+	//
+
+			}); //END dojo.ready()
+
+		</script>
+	</head>
+	<body class="claro" style="background-color: #EDEDED; background-image: url(image/background_stripes.gif)">
+		<div	id="appLayout" 
+				class="demoLayout" 
+				data-dojo-type="dijit.layout.BorderContainer" 
+				data-dojo-props="design: 'sidebar'">
+				
+			<div	class="centerPanel" 
+					data-dojo-type="dijit.layout.ContentPane" 
+					data-dojo-props="region: 'center',id: 'contentStack'">
+				<section id="sognefjord-header-map" style="width:100%; height:100%">
+				</section>
+			</div>
+			
+			<div	data-dojo-type="dijit.layout.TabContainer" 
+					data-dojo-props="	region: 'bottom',
+										id: 'div_id_tab_container', 
+										tabPosition: 'bottom',
+										splitter: 'true'"
+					class="tab-container">
+				
+				<div	data-dojo-type="dijit.layout.ContentPane" 
+						data-dojo-props="	title: 'Search',
+											id: 'div_id_tab_search_settings'">
+					
+				<tbody>
+				<tr>
+					<td>
+						<div class="search-header">
+							<div class="search-header-banner"></div>
+							<div class="search-header-content">
+								<div class="wherewhowhat" style="width: 120px;"><h1>1. Where</h1></div>
+								<div class="wherewhowhat" style="margin-left: 5px; width: 160px;"><h1>2. Who</h1></div>
+								<div class="wherewhowhat" style="margin-left: 5px; width: 190px;"><h1>3. What</h1></div>
+								<div class="wherewhowhatb" style="margin-left: 5px; width: 160px;">
+									<button id="form_search_button_id"></button>
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="search-content">
+
+							<!--
+							Map status.
+							OBS! Innholdet i denne div'en vert heile tida overskrive.
+							-->
+							<div id="div_id_map_status" class="map-status-box">
+								<p>Map status display.</p>
+							</div>
+
+							<div class="search-source-box">
+								<h2>Service provider</h2>
+								<p>
+									Select a data source.
+								</p>
+								<!-- FORM - START -->
+								<form name="form_select_data_source" action="">
+									<input type="radio" name="radio_select_data_source" id="radio_source_sindice" checked value="sindice" onchange="generate_what_box()"/>
+									<label for="radio_source_sindice">Sindice.com</label><br>
+									<input type="radio" name="radio_select_data_source" id="radio_source_open_street_map" value="osm" onchange="generate_what_box()"/>
+									<label for="radio_source_open_street_map">OpenStreetMap.org</label>
+								</form>
+								<!-- FORM - END -->
+							</div>
+
+							<div id="div_id_select_ontology" class="what-box">
+									<h2>Ontology</h2>
+									<p>Loading...</p>
+							</div>
+
+							<div id="div_id_search_column_4" class="osm-filter-search-box">
+							</div>
+
+						</div>
+					</td>
+				</tr>
+				</tbody>	
+				</div>
+
+				<div data-dojo-type="dijit.layout.ContentPane" data-dojo-props="title: 'Heatmap', id: 'div_id_tab_heatmap_settings'">
+					<p>In order to see a heatmap, select something and add it to a heatmap group.</p>
+				</div>
+				
+			</div>
+			
+			<div	id="leftCol" 
+					class="edgePanel" 
+					data-dojo-type="dijit.layout.StackContainer" 
+					data-dojo-props="region: 'right'">
+				
+				<div	data-dojo-type="dijit.layout.ContentPane" 
+						data-dojo-props="	title: 'Selected thing',
+											id: 'div_id_selected_thing'">
+					<h4>SemanticGeoBrowser</h4>
+				</div>
+
+			</div>
+			
+		</div>
+	</body>
+</html>
